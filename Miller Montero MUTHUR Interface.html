@@ -1,0 +1,764 @@
+<!-- montero_miller.html (PORTRAIT + 3-COLUMN GRID + SCROLLBARS + COLLAPSIBLE CATEGORIES) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>MU/TH/UR 6500 // USCSS MONTERO // MILLER</title>
+
+  <style>
+    :root{
+      --bg:#000;
+      --fg:#7af042;
+      --fg2:#54b92f;
+      --line:rgba(122,240,66,.28);
+      --warn:#c9ff6a;
+      --crit:#ffcc66;
+
+      --pad: clamp(10px, 2.8vw, 16px);
+      --radius: 12px;
+      --btnMinH: 52px;
+
+      --fontBase: clamp(15px, 3.2vw, 22px);
+      --fontSmall: clamp(12px, 2.6vw, 16px);
+      --fontTiny: clamp(11px, 2.2vw, 14px);
+
+      --typeSpeed: 12; /* ms/char */
+    }
+
+    html, body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family:"Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-size: var(--fontBase);
+      overflow:hidden;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+      touch-action: manipulation;
+    }
+
+    /* CRT overlay */
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(122,240,66,.10), transparent 55%),
+        linear-gradient(to bottom, rgba(0,0,0,.10), rgba(0,0,0,.55)),
+        repeating-linear-gradient(to bottom,
+          rgba(255,255,255,.03) 0px, rgba(255,255,255,.03) 1px,
+          rgba(0,0,0,0) 2px, rgba(0,0,0,0) 4px
+        );
+      mix-blend-mode: screen;
+      opacity:.9;
+    }
+
+    #app{
+      height:100%;
+      display:grid;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    #topbar{
+      padding: calc(var(--pad) + env(safe-area-inset-top)) var(--pad) var(--pad);
+      border-bottom:1px solid var(--line);
+      background: linear-gradient(to bottom, rgba(15,25,15,.7), rgba(0,0,0,0));
+      display:grid;
+      gap: 6px;
+    }
+    #title{
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-weight:700;
+      font-size: 1.0em;
+      line-height:1.15;
+    }
+    #statusrow{
+      display:flex;
+      gap:10px;
+      align-items:baseline;
+      justify-content:space-between;
+      min-width:0;
+    }
+    #statusline{
+      color:var(--fg2);
+      opacity:.95;
+      letter-spacing:.07em;
+      font-size: var(--fontSmall);
+      line-height:1.2;
+      flex:1;
+      min-width:0;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+    #clock{
+      color:var(--fg2);
+      opacity:.85;
+      letter-spacing:.08em;
+      font-size: var(--fontSmall);
+      white-space:nowrap;
+      flex:none;
+    }
+
+    /* ===== Categories area (collapsible) ===== */
+    #catArea{
+      padding: 8px var(--pad);
+      border-bottom:1px solid rgba(122,240,66,.16);
+      background: rgba(0,0,0,.25);
+      overflow:hidden; /* prevent sideways bleed */
+    }
+
+    #catHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 6px 0 10px 0;
+    }
+    #catHeader .label{
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-weight:700;
+      font-size: var(--fontSmall);
+      color: var(--fg2);
+      opacity:.95;
+      min-width:0;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+    #catToggle{
+      border:1px solid rgba(122,240,66,.25);
+      background: linear-gradient(180deg, rgba(12,22,12,.75), rgba(0,0,0,.35));
+      color: var(--fg);
+      border-radius: 999px;
+      padding: 10px 12px;
+      min-height: 44px;
+      font-size: var(--fontTiny);
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      flex:none;
+    }
+    #catToggle:active{ transform: translateY(1px); }
+
+    /* When collapsed, hide the category lists */
+    #catArea.is-collapsed #categories,
+    #catArea.is-collapsed #categoriesRail{
+      display:none !important;
+    }
+    #catArea.is-collapsed{
+      padding-bottom: 10px;
+    }
+
+    /* ===== Layout modes: grid (portrait) + rail (larger) ===== */
+
+    /* Horizontal rail with visible scrollbar */
+    .rail{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling: touch;
+
+      scrollbar-width: thin;
+      scrollbar-color: rgba(122,240,66,.35) rgba(0,0,0,.25);
+      padding-bottom: 6px;
+      min-width:0;
+    }
+    .rail::-webkit-scrollbar{ height: 10px; }
+    .rail::-webkit-scrollbar-track{ background: rgba(0,0,0,.25); }
+    .rail::-webkit-scrollbar-thumb{
+      background: rgba(122,240,66,.35);
+      border: 2px solid rgba(0,0,0,.25);
+      border-radius: 10px;
+    }
+
+    /* 3-column grid with visible vertical scrollbar */
+    .gridWrap{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:10px;
+
+      max-height: 26vh;
+      overflow-y:auto;
+      overflow-x:hidden;
+
+      scrollbar-width: thin;
+      scrollbar-color: rgba(122,240,66,.35) rgba(0,0,0,.25);
+      padding-right: 4px;
+      min-width:0;
+    }
+    .gridWrap::-webkit-scrollbar{ width: 10px; }
+    .gridWrap::-webkit-scrollbar-track{ background: rgba(0,0,0,.25); }
+    .gridWrap::-webkit-scrollbar-thumb{
+      background: rgba(122,240,66,.35);
+      border: 2px solid rgba(0,0,0,.25);
+      border-radius: 10px;
+    }
+
+    /* Chips */
+    .chip{
+      min-height: var(--btnMinH);
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(12,22,12,.85), rgba(5,10,5,.55));
+      color: var(--fg);
+      border-radius: var(--radius);
+      padding: 12px 12px;
+      text-align:left;
+      user-select:none;
+      cursor:pointer;
+      transition: transform .06s ease, border-color .12s ease, background .12s ease;
+      outline:none;
+      -webkit-tap-highlight-color: transparent;
+
+      width:100%;
+      min-width:0;           /* critical */
+      box-sizing:border-box;
+    }
+    .chip:active{ transform: translateY(1px); }
+    .chip .k{
+      display:block;
+      font-weight:700;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-size: var(--fontSmall);
+      line-height:1.1;
+
+      min-width:0;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+      white-space:normal;
+    }
+    .chip .d{
+      display:block;
+      margin-top: 6px;
+      color: var(--fg2);
+      opacity:.9;
+      font-size: var(--fontTiny);
+      letter-spacing:.03em;
+      line-height:1.15;
+
+      min-width:0;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+      white-space:normal;
+    }
+    .chip.active{
+      border-color: rgba(122,240,66,.60);
+      background: linear-gradient(180deg, rgba(16,30,16,.92), rgba(6,12,6,.65));
+      box-shadow: 0 0 0 1px rgba(122,240,66,.12), 0 0 22px rgba(122,240,66,.08);
+    }
+
+    /* Workspace */
+    #workspace{
+      margin: var(--pad);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(10,20,10,.55), rgba(0,0,0,.35));
+      display:grid;
+      grid-template-rows: auto auto 1fr;
+      overflow:hidden;
+      min-height:0;
+    }
+
+    #wsHeader{
+      padding: 12px;
+      border-bottom:1px solid rgba(122,240,66,.16);
+      display:grid;
+      gap:6px;
+      background: rgba(0,0,0,.18);
+    }
+    #wsTitle{
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-weight:700;
+      font-size: var(--fontSmall);
+      line-height:1.2;
+    }
+    #wsMeta{
+      color:var(--fg2);
+      opacity:.88;
+      font-size: var(--fontTiny);
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      line-height:1.2;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      min-width:0;
+    }
+
+    #subArea{
+      padding: 10px 12px;
+      border-bottom:1px solid rgba(122,240,66,.12);
+      background: rgba(0,0,0,.10);
+      overflow:hidden;
+    }
+    #categories, #subcats, #categoriesRail, #subcatsRail{ min-width:0; }
+
+    #details{
+      padding: 12px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      min-height:0;
+    }
+
+    .line{
+      display:block;
+      margin: 0 0 10px 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.25;
+      font-size: var(--fontBase);
+    }
+    .underline{
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 5px;
+    }
+    .dim{ color: var(--fg2); opacity:.9; }
+    .warn{ color: var(--warn); }
+    .crit{ color: var(--crit); }
+
+    .cursor{
+      display:inline-block;
+      width:.55em;
+      margin-left:.15em;
+      background: var(--fg);
+      opacity:.65;
+      animation: blink 1.05s infinite steps(1);
+      transform: translateY(.08em);
+    }
+    @keyframes blink { 50%{ opacity:0; } }
+
+    /* Login */
+    #loginOverlay{
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background: rgba(0,0,0,.86);
+      z-index: 9999;
+      padding: var(--pad);
+      padding-top: calc(var(--pad) + env(safe-area-inset-top));
+      padding-bottom: calc(var(--pad) + env(safe-area-inset-bottom));
+      box-sizing:border-box;
+    }
+    #loginCard{
+      width:min(860px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(10,20,10,.75), rgba(0,0,0,.6));
+      box-shadow: 0 0 0 1px rgba(0,0,0,.7), 0 0 40px rgba(122,240,66,.08);
+      padding: 16px;
+    }
+    #loginCard h1{
+      margin:0 0 8px 0;
+      font-size:1.08em;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+    }
+    #loginCard .sub{
+      margin:0 0 14px 0;
+      color: var(--fg2);
+      opacity:.9;
+      font-size: var(--fontSmall);
+      letter-spacing:.08em;
+      line-height:1.2;
+    }
+
+    /* Portrait: use grid; Larger: use rail */
+    @media (max-width: 520px){
+      #categoriesRail, #subcatsRail { display:none; }
+      #categories, #subcats { display:grid; }
+      .gridWrap{ max-height: 28vh; }
+    }
+    @media (min-width: 521px){
+      #categories, #subcats { display:none; }
+      #categoriesRail, #subcatsRail { display:flex; }
+      .rail .chip{ flex: 0 0 auto; min-width: 220px; width:auto; }
+    }
+  </style>
+</head>
+
+<body>
+<div id="app">
+  <div id="topbar">
+    <div id="title">MU/TH/UR 6500 // USCSS MONTERO</div>
+    <div id="statusrow">
+      <div id="statusline">STANDBY — CRYO RECOVERY COMPLETE. ROUTE: “THE GAUNTLET” // ANCHORPOINT → SUTTER’S WORLD.</div>
+      <div id="clock">--:--:--</div>
+    </div>
+  </div>
+
+  <div id="catArea">
+    <div id="catHeader">
+      <div class="label">DATA CATEGORIES</div>
+      <button id="catToggle" type="button" aria-expanded="true">HIDE</button>
+    </div>
+
+    <!-- Render into BOTH; CSS chooses grid/rail -->
+    <div id="categories" class="gridWrap" aria-label="data categories grid"></div>
+    <div id="categoriesRail" class="rail" aria-label="data categories rail"></div>
+  </div>
+
+  <div id="workspace">
+    <div id="wsHeader">
+      <div id="wsTitle">DATA CATEGORIES</div>
+      <div id="wsMeta">OPERATOR: UNAUTHENTICATED</div>
+    </div>
+
+    <div id="subArea">
+      <div id="subcats" class="gridWrap" aria-label="subcategories grid"></div>
+      <div id="subcatsRail" class="rail" aria-label="subcategories rail"></div>
+    </div>
+
+    <div id="details" aria-label="details output"></div>
+  </div>
+</div>
+
+<div id="loginOverlay">
+  <div id="loginCard">
+    <h1>IDENTIFY</h1>
+    <p class="sub">AUTHORIZED PERSONNEL PROFILES AVAILABLE:</p>
+    <button class="chip" id="loginMiller" type="button" style="width:100%;">
+      <span class="k">V. MILLER</span>
+      <span class="d">CAPTAIN // FLIGHT DECK AUTHORITY</span>
+    </button>
+    <p class="sub" style="margin-top:14px; opacity:.8;">INTERFACE INPUT: BOX-SELECTION ONLY.</p>
+  </div>
+</div>
+
+<script>
+  const els = {
+    clock: document.getElementById("clock"),
+    catArea: document.getElementById("catArea"),
+    catToggle: document.getElementById("catToggle"),
+
+    categoriesGrid: document.getElementById("categories"),
+    categoriesRail: document.getElementById("categoriesRail"),
+
+    subcatsGrid: document.getElementById("subcats"),
+    subcatsRail: document.getElementById("subcatsRail"),
+
+    details: document.getElementById("details"),
+    wsTitle: document.getElementById("wsTitle"),
+    wsMeta: document.getElementById("wsMeta"),
+
+    loginOverlay: document.getElementById("loginOverlay"),
+    loginMiller: document.getElementById("loginMiller")
+  };
+
+  const TYPE_SPEED = Number(getComputedStyle(document.documentElement).getPropertyValue("--typeSpeed")) || 12;
+
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function nowClock(){
+    const d = new Date();
+    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+  }
+  setInterval(()=> els.clock.textContent = nowClock(), 250);
+  els.clock.textContent = nowClock();
+
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  async function typeLine(targetEl, text, opts = {}){
+    const speed = Number.isFinite(opts.speed) ? opts.speed : TYPE_SPEED;
+    const underline = !!opts.underline;
+    const cls = opts.cls || "";
+    const prefix = opts.prefix ?? `${nowClock()} [MU/TH/UR] `;
+    const showPrefix = opts.showPrefix !== false;
+
+    const line = document.createElement("span");
+    line.className = `line ${underline ? "underline" : ""} ${cls}`.trim();
+    targetEl.appendChild(line);
+
+    const full = (showPrefix ? prefix : "") + text;
+    const cursor = document.createElement("span");
+    cursor.className = "cursor";
+    cursor.textContent = " ";
+    const textNode = document.createTextNode("");
+    line.appendChild(textNode);
+    line.appendChild(cursor);
+
+    let out = "";
+    for (let i=0; i<full.length; i++){
+      out += full[i];
+      textNode.textContent = out;
+      await sleep(speed);
+    }
+    cursor.remove();
+    targetEl.scrollTop = targetEl.scrollHeight;
+  }
+
+  function clearForNewCategory(){
+    els.subcatsGrid.innerHTML = "";
+    els.subcatsRail.innerHTML = "";
+    els.details.innerHTML = "";
+    els.details.scrollTop = 0;
+  }
+
+  function setActiveCategory(catId){
+    const all = [
+      ...els.categoriesGrid.querySelectorAll(".chip"),
+      ...els.categoriesRail.querySelectorAll(".chip")
+    ];
+    all.forEach(btn => btn.classList.toggle("active", btn.dataset.id === catId));
+  }
+
+  function setActiveSub(subId){
+    const all = [
+      ...els.subcatsGrid.querySelectorAll(".chip"),
+      ...els.subcatsRail.querySelectorAll(".chip")
+    ];
+    all.forEach(btn => btn.classList.toggle("active", btn.dataset.id === subId));
+  }
+
+  function setCategoriesCollapsed(collapsed){
+    els.catArea.classList.toggle("is-collapsed", collapsed);
+    els.catToggle.textContent = collapsed ? "SHOW" : "HIDE";
+    els.catToggle.setAttribute("aria-expanded", String(!collapsed));
+    try { localStorage.setItem("montero_cat_collapsed", collapsed ? "1" : "0"); } catch(e){}
+  }
+
+  // KB (Miller)
+  const KB = {
+    operator: { name:"Vanessa Miller", role:"Captain", access:"STANDARD" },
+    ship: {
+      overview: [
+        "LOCKMART CM-88G BISON-CLASS FREIGHTER.",
+        "SERIES-COMPARABLE TO USCSS NOSTROMO; NEWER MODEL WITH MINOR UPGRADES.",
+        "PROPULSION: STANDARD SATURN J 3000 ENGINES (NO N66 CYCLONE UPGRADE).",
+        "TOW RATING: NOT A COMMERCIAL TUG. INTERNAL HAUL CONFIGURATION.",
+        "CARGO BAY: CAVERNOUS; VENTRAL ACCESS."
+      ],
+      modules: [
+        "DECK A: BRIDGE / HYPERDRIVE / MACHINERY SPACE / CRYO / TANKAGE / GALLEY / MEDLAB / MU/TH/UR.",
+        "PASSAGEWAY UMBILICAL: 10-METER CONNECTOR FOR AIRLOCK-TO-AIRLOCK TRANSFER."
+      ],
+      systems: {
+        vessel: [
+          "HULL: INTEGRITY NOMINAL. MICROFRACTURE MAP: STABLE.",
+          "THERMAL: GREEN-ZONE AVERAGE. LOCALIZED HOTSPOTS: NONE.",
+          "GRAV: 1.0G SETPOINT. VARIANCE: ±0.02G."
+        ],
+        propulsion: [
+          "SATURN J 3000 THRUSTERS: READY.",
+          "DISPLACEMENT DRIVE: STANDBY (FTL CAPABLE).",
+          "COMMERCIAL TOW INTERFACE: NOT INSTALLED."
+        ],
+        lifeSupport: [
+          "O2 SCRUBBING: NOMINAL.",
+          "CO2: WITHIN LIMITS.",
+          "CRYO DECK: RECOVERY COMPLETE. PODS: 5/5 ONLINE."
+        ],
+        power: [
+          "PRIMARY BUS: STABLE.",
+          "AUX BUS: STABLE.",
+          "REACTOR: WITHIN OUTPUT ENVELOPE."
+        ],
+        comms: [
+          "COMMS ARRAY: NOMINAL.",
+          "ENCRYPTION: ROUTINE TRADE CHANNELS AVAILABLE."
+        ],
+        sensors: [
+          "SENSORS: PARTIAL ANOMALY HISTORY — INTERMITTENT REFLECTION PINGS PRIOR TO FTL.",
+          "RESOLUTION: STANDARD CARGO HAULER GRADE."
+        ]
+      }
+    },
+    cargo: {
+      summary: [
+        "BAY LOAD: 72 HIGH-PRESSURE TANKS.",
+        "CONTENTS: 200,000 TONS AGING TRITIUM GAS (DECAYING INTO HELIUM-3).",
+        "HAZARD: VOLATILE/FLAMMABLE — EXTREME CAUTION ADVISED.",
+        "DELIVERY: SUTTER’S WORLD (WEYLAND-YUTANI CORPORATE ACCOUNT)."
+      ],
+      shuttle: [
+        "WY-37B FLATBED CARGO LIFTER ‘DAISY’: SERVICEABLE BUT AILING.",
+        "LOW-ORBIT FERRY CAPABILITY: LIMITED."
+      ]
+    },
+    gear: [
+      "5× IRC MK.50 COMPRESSION SUIT (AIR SUPPLY 5 EACH).",
+      "1× M314 MOTION TRACKER (POWER 5).",
+      "1× CUTTING TORCH (POWER 5).",
+      "1× WATATSUMI BOLT GUN (4 SHOTS).",
+      "1× M4A3 SERVICE PISTOL (1 RELOAD).",
+      "1× SPACESUB ASSO-400 HARPOON GRAPPLING GUN.",
+      "1× M240 INCINERATOR UNIT (2 RELOADS).",
+      "1× P-5000 POWER LOADER."
+    ],
+    crew: [
+      { key:"miller", header:"VANESSA MILLER — CAPTAIN", body:["AGE: 46. PERSONALITY: THRIFTY.","NOTES: LEASE-TO-BUY OFFER EXISTS; UPGRADE PRESSURE DUE TO NON-TUG RATING.","BUDDY: DAVIS. RIVAL: WILSON."] },
+      { key:"davis", header:"LEAH DAVIS — PILOT", body:["AGE: 27. PERSONALITY: ADRENALINE JUNKIE.","NOTES: KNOWN FOR PUSHING EQUIPMENT PAST LIMITS; STIMULANT DEPENDENCE RISK FLAG.","BUDDY: MILLER."] },
+      { key:"rye", header:"KAYLA RYE — TECHNICIAN", body:["AGE: 23. PERSONALITY: BITTER.","NOTES: FINANCIAL PRESSURE (FAMILY MEDICAL). WILL SEEK INCREASED SHARE.","BUDDY: CHAM. RIVAL: MILLER."] },
+      { key:"cham", header:"LYRON CHAM — CARGO HANDLER", body:["AGE: 32. PERSONALITY: LOYAL.","NOTES: PROTECTIVE OF CREW; HEAVY MACHINERY PROFICIENCY HIGH.","BUDDY: RYE."] },
+      { key:"wilson", header:"JOHN J. WILSON — COMPANY AGENT", body:["AGE: 43. PERSONALITY: AMBITIOUS.","NOTES: EMBEDDED ~6 MONTHS; EVALUATING SHIP/CREW PERFORMANCE.","SIGNATURE: ACCESS KEYCARD. RIVAL: MILLER."] },
+    ],
+    nav: {
+      route: [
+        "CURRENT RUN: ‘THE GAUNTLET’ — ANCHORPOINT STATION → FRONTIER.",
+        "DESTINATION: SUTTER’S WORLD (FRONTIER COLONY)."
+      ],
+      advisory: [
+        "NOTE: SENSORS REPORTED SPORADIC REFLECTIONS PRIOR TO DISPLACEMENT DRIVE ENGAGE.",
+        "RECOMMEND: MAINTAIN STANDARD WATCH; LOG CONTACTS."
+      ]
+    },
+    sensorsComms: {
+      sensors: [
+        "SENSOR SUITE: STANDARD FREIGHTER PACKAGE.",
+        "ANOMALY LOG: ‘GLITCH’ — SPORADIC CONTACT PINGS PRIOR TO FTL (UNRESOLVED)."
+      ],
+      comms: [
+        "COMMS: ROUTINE TRADE BANDS ONLINE.",
+        "DISTRESS MONITOR: ACTIVE (PASSIVE LISTEN)."
+      ]
+    }
+  };
+
+  const DATA_MODEL = [
+    {
+      id:"system", label:"SYSTEM STATUS", desc:"VESSEL / PROP / LIFE / POWER / COMMS / SENSORS",
+      subs:[
+        { id:"vessel", label:"VESSEL", get:()=>KB.ship.systems.vessel },
+        { id:"prop", label:"PROPULSION", get:()=>KB.ship.systems.propulsion },
+        { id:"life", label:"LIFE SUPPORT", get:()=>KB.ship.systems.lifeSupport },
+        { id:"power", label:"POWER", get:()=>KB.ship.systems.power },
+        { id:"comms", label:"COMMS", get:()=>KB.ship.systems.comms },
+        { id:"sensors", label:"SENSORS", get:()=>KB.ship.systems.sensors },
+      ]
+    },
+    {
+      id:"ship", label:"VESSEL DATA", desc:"CLASS / MODULES / UMBILICAL",
+      subs:[
+        { id:"overview", label:"OVERVIEW", get:()=>KB.ship.overview },
+        { id:"modules", label:"DECK / MODULES", get:()=>KB.ship.modules }
+      ]
+    },
+    {
+      id:"cargo", label:"CARGO MANIFEST", desc:"TANKAGE / DAISY",
+      subs:[
+        { id:"summary", label:"PRIMARY CARGO", get:()=>KB.cargo.summary },
+        { id:"daisy", label:"WY-37B ‘DAISY’", get:()=>KB.cargo.shuttle }
+      ]
+    },
+    {
+      id:"crew", label:"CREW ROSTER", desc:"FILES / PERSONNEL",
+      subs: KB.crew.map(p => ({ id:p.key, label:p.header.split(" — ")[0], get:()=>[p.header, ...p.body] }))
+    },
+    {
+      id:"gear", label:"GEAR & ARMAMENT", desc:"INVENTORY",
+      subs:[
+        { id:"inv", label:"INVENTORY LIST", get:()=>KB.gear },
+        { id:"note", label:"ALLOCATION NOTE", get:()=>[
+          "STANDARD PROTOCOL: CAPTAIN AUTHORIZES ALLOCATION.",
+          "ADVISORY: COMPRESSION SUITS REQUIRED FOR EVA/UMBILICAL TRANSFER."
+        ]}
+      ]
+    },
+    {
+      id:"scom", label:"SENSOR & COMMS", desc:"LOGS / STATUS",
+      subs:[
+        { id:"s", label:"SENSOR SUITE", get:()=>KB.sensorsComms.sensors },
+        { id:"c", label:"COMMUNICATIONS", get:()=>KB.sensorsComms.comms }
+      ]
+    },
+    {
+      id:"nav", label:"NAVIGATION", desc:"ROUTE / ADVISORIES",
+      subs:[
+        { id:"route", label:"CURRENT ROUTE", get:()=>KB.nav.route },
+        { id:"adv", label:"NAV ADVISORIES", get:()=>KB.nav.advisory }
+      ]
+    }
+  ];
+
+  function makeChip({id, title, desc}, onClick){
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.dataset.id = id;
+    b.innerHTML = `<span class="k">${title}</span><span class="d">${desc || "SELECT"}</span>`;
+    b.addEventListener("click", onClick, {passive:true});
+    return b;
+  }
+
+  function renderCategories(){
+    els.categoriesGrid.innerHTML = "";
+    els.categoriesRail.innerHTML = "";
+    for (const c of DATA_MODEL){
+      els.categoriesGrid.appendChild(makeChip({id:c.id, title:c.label, desc:c.desc}, ()=>selectCategory(c.id)));
+      els.categoriesRail.appendChild(makeChip({id:c.id, title:c.label, desc:c.desc}, ()=>selectCategory(c.id)));
+    }
+  }
+
+  async function selectCategory(catId){
+    const cat = DATA_MODEL.find(c=>c.id===catId);
+    if (!cat) return;
+
+    setActiveCategory(catId);
+    clearForNewCategory();
+
+    els.wsTitle.textContent = cat.label;
+    els.wsMeta.textContent = `OPERATOR: ${KB.operator.name.toUpperCase()} // ROLE: ${KB.operator.role.toUpperCase()} // ACCESS: ${KB.operator.access}`;
+
+    els.subcatsGrid.innerHTML = "";
+    els.subcatsRail.innerHTML = "";
+    for (const s of cat.subs){
+      els.subcatsGrid.appendChild(makeChip({id:s.id, title:s.label, desc:"SELECT TO DISPLAY"}, ()=>selectSub(cat, s)));
+      els.subcatsRail.appendChild(makeChip({id:s.id, title:s.label, desc:"SELECT TO DISPLAY"}, ()=>selectSub(cat, s)));
+    }
+
+    await typeLine(els.details, "CATEGORY READY. SELECT A SUBCATEGORY.", { underline:true, cls:"dim" });
+  }
+
+  async function selectSub(cat, sub){
+    setActiveSub(sub.id);
+    els.details.innerHTML = "";
+
+    await typeLine(els.details, `${cat.label} / ${sub.label}`, { underline:true });
+
+    const lines = sub.get() || [];
+    for (const l of lines){
+      const cls =
+        /^WARNING|HAZARD|ADVISORY/.test(l) ? "warn" :
+        /^CRITICAL|FAILSAFE/.test(l) ? "crit" : "";
+      await typeLine(els.details, l, { cls });
+    }
+  }
+
+  // Collapsible categories (persist)
+  els.catToggle.addEventListener("click", ()=>{
+    const collapsed = els.catArea.classList.contains("is-collapsed");
+    setCategoriesCollapsed(!collapsed);
+  });
+
+  // Restore collapse state
+  try{
+    const v = localStorage.getItem("montero_cat_collapsed");
+    if (v === "1") setCategoriesCollapsed(true);
+  }catch(e){}
+
+  // Login
+  els.loginMiller.addEventListener("click", async ()=>{
+    els.loginOverlay.style.display = "none";
+    renderCategories();
+
+    els.details.innerHTML = "";
+    els.wsMeta.textContent = `OPERATOR: ${KB.operator.name.toUpperCase()} // ROLE: ${KB.operator.role.toUpperCase()} // ACCESS: ${KB.operator.access}`;
+
+    await typeLine(els.details, "CONNECTION ESTABLISHED.");
+    await typeLine(els.details, "SYSTEM: MU/TH/UR 6500 ONLINE.");
+    await typeLine(els.details, "VESSEL: USCSS MONTERO (CM-88G BISON-CLASS).");
+    await typeLine(els.details, "OPERATOR PROFILE LOADED: MILLER, V. — CAPTAIN.", { underline:true });
+    await typeLine(els.details, "SELECT A DATA CATEGORY ABOVE.", { cls:"dim" });
+  });
+</script>
+</body>
+</html>

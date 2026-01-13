@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>MU/TH/UR 2000 // USCSS CRONUS</title>
+
+  <style>
+    :root{
+      --bg:#000;
+      --fg:#7af042;
+      --fg2: rgba(122,240,66,.82);
+      --fg3: rgba(122,240,66,.62);
+      --line: rgba(122,240,66,.35);
+      --line2: rgba(122,240,66,.22);
+      --shadow: rgba(122,240,66,.18);
+      --danger: rgba(122,240,66,.95);
+      --pad: 12px;
+      --radius: 14px;
+      --fontBase: clamp(14px, 2.35vh, 18px);
+      --fontSmall: clamp(12px, 2.0vh, 15px);
+      --fontTiny: clamp(11px, 1.7vh, 14px);
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family:"Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      overflow:hidden;
+      font-size: var(--fontBase);
+    }
+
+    /* Layout */
+    #app{
+      height:100%;
+      display:grid;
+      grid-template-rows: auto auto auto 1fr;
+      gap: 10px;
+      padding: var(--pad);
+      padding-top: calc(var(--pad) + env(safe-area-inset-top));
+      padding-bottom: calc(var(--pad) + env(safe-area-inset-bottom));
+      box-sizing:border-box;
+    }
+
+    #topbar{
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      background: linear-gradient(180deg, rgba(10,20,10,.65), rgba(0,0,0,.55));
+      box-shadow: 0 0 0 1px rgba(0,0,0,.75), 0 0 26px var(--shadow);
+    }
+    #title{
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size: 1.05em;
+      line-height:1.1;
+    }
+    #statusrow{
+      margin-top: 8px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    #statusline{
+      color: var(--fg2);
+      font-size: var(--fontSmall);
+      line-height: 1.25;
+      flex:1;
+      min-width: 0;
+    }
+    #clock{
+      color: var(--fg3);
+      font-size: var(--fontTiny);
+      letter-spacing:.12em;
+      white-space:nowrap;
+    }
+
+    /* Restore panel */
+    #restorePanel{
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      background: linear-gradient(180deg, rgba(5,12,5,.55), rgba(0,0,0,.5));
+      box-shadow: 0 0 0 1px rgba(0,0,0,.75), 0 0 18px var(--shadow);
+    }
+    #restoreHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 8px;
+    }
+    #restoreHead .label{
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size: var(--fontTiny);
+      color: var(--fg2);
+    }
+    #restoreHead button{
+      all:unset;
+      cursor:pointer;
+      padding:6px 10px;
+      border:1px solid var(--line2);
+      border-radius: 999px;
+      color: var(--fg2);
+      font-size: var(--fontTiny);
+      letter-spacing:.08em;
+      user-select:none;
+    }
+    #restoreHead button:active{ transform: translateY(1px); }
+
+    #restoreGrid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 22vh;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 4px;
+    }
+
+    .check{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border: 1px solid var(--line2);
+      border-radius: 12px;
+      padding: 10px 10px;
+      background: rgba(0,0,0,.45);
+    }
+    .check input{ width: 18px; height: 18px; accent-color: #7af042; }
+    .check .k{
+      font-size: var(--fontTiny);
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color: var(--fg);
+      line-height: 1.05;
+    }
+    .check .d{
+      font-size: var(--fontTiny);
+      color: var(--fg3);
+      line-height: 1.1;
+      margin-top: 2px;
+    }
+    .check .txt{ display:flex; flex-direction:column; min-width:0; }
+
+    /* Categories area */
+    #catArea{
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      background: linear-gradient(180deg, rgba(10,20,10,.55), rgba(0,0,0,.5));
+      box-shadow: 0 0 0 1px rgba(0,0,0,.75), 0 0 18px var(--shadow);
+      display:grid;
+      grid-template-rows: auto 1fr;
+      gap: 8px;
+      min-height: 0;
+    }
+
+    #catHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    #catHeader .label{
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size: var(--fontTiny);
+      color: var(--fg2);
+    }
+    #catToggle{
+      all:unset;
+      cursor:pointer;
+      padding:6px 10px;
+      border:1px solid var(--line2);
+      border-radius: 999px;
+      color: var(--fg2);
+      font-size: var(--fontTiny);
+      letter-spacing:.08em;
+      user-select:none;
+    }
+    #catToggle:active{ transform: translateY(1px); }
+
+    .gridWrap{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 4px; /* room for scrollbar */
+      min-height: 0;
+    }
+
+    .chip{
+      border:1px solid var(--line2);
+      border-radius: 14px;
+      padding: 10px 10px;
+      background: rgba(0,0,0,.45);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .06s ease, border-color .12s ease, box-shadow .12s ease;
+      min-width:0;
+    }
+    .chip:active{ transform: translateY(1px); }
+    .chip .h{
+      font-size: var(--fontTiny);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: var(--fg);
+      line-height:1.05;
+    }
+    .chip .s{
+      margin-top: 4px;
+      font-size: var(--fontTiny);
+      color: var(--fg3);
+      line-height:1.12;
+    }
+    .chip.active{
+      border-color: rgba(122,240,66,.7);
+      box-shadow: 0 0 0 1px rgba(122,240,66,.22), 0 0 14px rgba(122,240,66,.2);
+    }
+
+    /* Workspace */
+    #workspace{
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35));
+      box-shadow: 0 0 0 1px rgba(0,0,0,.75), 0 0 24px var(--shadow);
+      display:grid;
+      grid-template-rows: auto auto 1fr;
+      min-height: 0;
+      overflow:hidden;
+    }
+    #wsHeader{
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line2);
+    }
+    #wsTitle{
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size: var(--fontTiny);
+      color: var(--fg2);
+    }
+    #wsMeta{
+      margin-top: 6px;
+      color: var(--fg3);
+      font-size: var(--fontTiny);
+      letter-spacing:.08em;
+      line-height:1.2;
+    }
+
+    #subArea{
+      padding: 10px 12px 0 12px;
+      border-bottom: 1px solid var(--line2);
+    }
+    #subcats{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 18vh;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 4px;
+      padding-bottom: 10px;
+      min-height: 0;
+    }
+
+    #output{
+      padding: 12px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
+    }
+    .line{
+      position:relative;
+      padding: 2px 0;
+      line-height: 1.32;
+      word-break: break-word;
+    }
+    .bright{ color: var(--fg); }
+    .dim{ color: var(--fg3); }
+    .underline{
+      display:inline-block;
+      border-bottom: 1px solid rgba(122,240,66,.65);
+      padding-bottom: 1px;
+    }
+    .hr{
+      height:1px;
+      background: rgba(122,240,66,.18);
+      margin: 10px 0;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 520px){
+      :root{ --pad: 10px; }
+      #restoreGrid, .gridWrap, #subcats{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      #statusrow{ flex-direction:column; }
+      #clock{ align-self:flex-end; }
+    }
+
+    /* Scrollbar visibility */
+    *::-webkit-scrollbar{ width: 10px; height: 10px; }
+    *::-webkit-scrollbar-track{ background: rgba(122,240,66,.06); }
+    *::-webkit-scrollbar-thumb{ background: rgba(122,240,66,.18); border-radius: 999px; border: 2px solid rgba(0,0,0,.6); }
+    *{ scrollbar-color: rgba(122,240,66,.22) rgba(122,240,66,.06); scrollbar-width: thin; }
+  
+    /* Smaller restoration controls */
+    #restoreGrid{
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      max-height: 14vh;
+    }
+    .check{
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+    }
+    .check input{ width: 14px; height: 14px; }
+    .check .k{ font-size: clamp(10px, 1.4vh, 12px); letter-spacing:.14em; }
+    .check .d{ display:none; } /* hides description to save space; effect messages appear in output */
+
+    /* Data category chips: smaller than before, still larger than restore controls */
+    .gridWrap{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .chip{
+      padding: 8px 9px;
+      border-radius: 14px;
+    }
+    .chip .h{ font-size: clamp(10px, 1.55vh, 13px); }
+    .chip .s{ font-size: clamp(10px, 1.45vh, 12px); }
+
+    /* Subcategory chips can match category size */
+    #subcats{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    /* FTL badge */
+    .ftlBadge{
+      display:none;
+      padding: 6px 10px;
+      border: 1px solid rgba(122,240,66,.9);
+      border-radius: 10px;
+      font-size: var(--fontTiny);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--fg);
+      background: rgba(0,0,0,.55);
+      white-space: nowrap;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.75), 0 0 18px rgba(122,240,66,.18);
+    }
+    @keyframes blinkConsistent { 0%,48%{opacity:1;} 50%,100%{opacity:.16;} }
+    .ftlBadge.visible{
+      display:inline-block;
+      animation: blinkConsistent .75s steps(1,end) infinite;
+    }
+
+    /* Responsive: keep restore controls compact */
+    @media (max-width: 520px){
+      #restoreGrid{ grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: 16vh; }
+      .check{ padding: 6px 8px; }
+      .check .k{ font-size: clamp(10px, 1.5vh, 12px); }
+      #subcats{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .gridWrap{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div id="topbar">
+      <div id="title">MU/TH/UR 2000 // USCSS CRONUS</div>
+      <div id="statusrow">
+        <div id="statusline">STANDBY — MAINFRAME OFFLINE. INTERNAL CONDITIONS: COLD / DARK / STALE AIR. ARTIFICIAL GRAVITY: ACTIVE.</div>
+        <div id="ftlBadge" class="ftlBadge" aria-live="polite">FTL NOW POSSIBLE</div>
+        <div id="clock">--:--:--</div>
+      </div>
+    </div>
+
+    <div id="restorePanel">
+      <div id="restoreHead">
+        <div class="label">SYSTEM RESTORATION CONTROLS</div>
+        <button id="restoreToggle" type="button" aria-expanded="true">HIDE</button>
+      </div>
+      <div id="restoreGrid" aria-label="system restoration switches"></div>
+    </div>
+
+    <div id="catArea">
+      <div id="catHeader">
+        <div class="label">DATA CATEGORIES</div>
+        <button id="catToggle" type="button" aria-expanded="true">HIDE</button>
+      </div>
+      <div id="categories" class="gridWrap" aria-label="data categories"></div>
+    </div>
+
+    <div id="workspace">
+      <div id="wsHeader">
+        <div id="wsTitle">DATA CATEGORIES</div>
+        <div id="wsMeta">OPERATOR: MONTERO CREW (TEMP ACCESS) // CLEARANCE: FIELD</div>
+      </div>
+
+      <div id="subArea">
+        <div id="subcats" aria-label="subcategories"></div>
+      </div>
+
+      <div id="output" aria-live="polite"></div>
+    </div>
+  </div>
+
+<script>
+/***********************
+ * Knowledge base (Cronus)
+ ***********************/
+const KB = {
+  meta: {
+    systemName: "MU/TH/UR 2000",
+    vessel: "USCSS CRONUS",
+    role: "SCIENCE / EXPLORATION",
+  },
+
+  ship: {
+    overview: [
+      "USCSS CRONUS — SCIENTIFIC EXPLORATORY VESSEL.",
+      "MANUFACTURER: WEYLAND CORP.",
+      "PRODUCT LINE: WEYLAND FTL SHIPS.",
+      "MODEL: HEAVY EXPLORATION / PROSPECTING VESSEL.",
+      "CLASS: HELIADES-CLASS.",
+      "REG: 142601."
+    ],
+    access: [
+      "MAIN AIRLOCK: DORSAL SIDE. OUTER DOOR BUCKLED FROM INSIDE; BREACH REQUIRES CUTTING TORCH + HEAVY MACHINERY.",
+      "AFTER BREACH: CONNECT MONTERO UMBILICAL + PRESSURIZE BEFORE OPENING INNER DOOR.",
+      "MU/TH/UR 2000 MAINFRAME: ABOVE BRIDGE; ENTRY REQUIRES COMMAND SEQUENCE OR EMERGENCY KEY.",
+      "KNOWN KEY HOLDERS (INITIAL): WILSON / JOHNS / COOPER."
+    ],
+    systems: {
+      vessel: [
+        "HULL: INTACT — MICRO-METEORITE SCARRING PRESENT.",
+        "INTERNAL ZONES: ICE / FROST ACCUMULATION — ELEVATED."
+      ],
+      propulsion: [
+        "ENGINES: OFFLINE.",
+        "NAVIGATION CONTROL: FAILED (MICRO-METEORITE STORM EVENT).",
+        "NOTE: ENGINE RESTORATION REQUIRES EXTERNAL REPAIRS; REACTOR CONTROL ROOM CLEARANCE ADVISED."
+      ],
+      lifeSupport: [
+        "LIFE SUPPORT: FAILED — SHIP IN DEEP COLD.",
+        "LIGHTING: EMERGENCY ONLY (ALL ZONES COUNT AS DARK).",
+        "ATMOSPHERE: STALE; HIGH CO₂."
+      ],
+      power: [
+        "POWER GRID: EMERGENCY BUS ONLY.",
+        "AUX POWER: AVAILABLE (LIMITED)."
+      ],
+      comms: [
+        "COMMS ARRAY: DAMAGED.",
+        "DISTRESS TRANSMISSION: INTERMITTENT / LEGACY BURST."
+      ],
+      sensors: [
+        "SENSORS: PARTIAL (LOCAL ONLY).",
+        "MOTION/THERMAL: DEGRADED BY INTERNAL TEMPERATURE GRADIENTS."
+      ]
+    }
+  },
+
+  environment: {
+    aboard: [
+      "COLD: INTERIOR IN DEEP FREEZE UNTIL LIFE SUPPORT ONLINE.",
+      "DARK: EMERGENCY LIGHTING ONLY UNTIL MAINFRAME ONLINE.",
+      "AIR: STALE WITH HIGH CO₂; PHYSIOLOGICAL PERFORMANCE DEGRADED UNTIL AIR SCRUBBERS FIXED.",
+      "GRAVITY: ARTIFICIAL GRAVITY REMAINS ACTIVE."
+    ],
+    advisory: [
+      "NOTE: OPENING SUITS PRIOR TO RESTORATION MAY CAUSE FREEZING EXPOSURE.",
+          ]
+  },
+
+  science: {
+    summary: [
+      "MISSION HISTORY: CRONUS DIVERTED VIA ENCRYPTED DATA TO 26 DRACONIS SYSTEM (LV-1113).",
+      "SUBJECT: CHEMICAL AGENT A0-3959X.91–15 (BLACK LIQUID) / 26 DRACONIS STRAIN.",
+      "CONTAMINATION: MOTE PATHOGEN SPORES → BLOODBURSTER EVENTS → NEOMORPHS.",
+      "COUNTERMEASURE: 26 DRACONIS STRAIN DERIVATIVE INOCULATION (INCOMPLETE SAFETY PROFILE).",
+      "OUTCOME: INOCULATION MAY CAUSE TRANSFORMATION INTO 'ABOMINATIONS'."
+    ],
+    protocols: [
+      "BIOHAZARD: QUARANTINE LEVEL ELEVATED.",
+      "ADVISORY: AVOID UNPROTECTED CONTACT WITH UNKNOWN ORGANIC MATERIAL.",
+      "CHAIN OF CUSTODY: SAMPLE HANDLING MUST BE LOGGED AND SEALED."
+    ]
+  },
+
+  personnel: [
+        {
+      key:"johns",
+      header:"ALBERT JOHNS — SECOND OFFICER (DE FACTO CAPTAIN)",
+      body:[
+        "AGE: 47. TEMPERAMENT: CAUTIOUS, COMPLIANT.",
+        "PROFILE: EXPERIENCED DECK OFFICER; GOOD AT KEEPING PEOPLE MOVING AND HOLDING A LINE UNDER PRESSURE.",
+        "EQUIPMENT: M4A3 PISTOL (LIMITED AMMO), KEY CARD.",
+        "NOTES: SEEKS CLEAR LEADERSHIP AND WILL DEFER TO A STRONGER COMMAND PRESENCE."
+      ]
+    },
+    {
+      key:"cooper",
+      header:"DANIEL COOPER — CHIEF SCIENCE OFFICER",
+      body:[
+        "AGE: 40. TEMPERAMENT: METHODICAL, DEFENSIVE.",
+        "PROFILE: GOOD AT FIELD LAB WORK, SAMPLE HANDLING, AND KEEPING A CREW FOCUSED ON PROCEDURE IN A CRISIS.",
+        "EQUIPMENT: KEY CARD (LAB ACCESS), PERSONAL DATAPAD (PARTIALLY DAMAGED).",
+        "NOTES: ASSOCIATED WITH LV-1113 RESEARCH TEAM; DETAILS RESTRICTED TO SCIENCE LOGS."
+      ]
+    },
+    {
+      key:"reid",
+      header:"VALERIE REID — SECURITY OFFICER",
+      body:[
+        "AGE: 34. TEMPERAMENT: ALERT, HARDENED.",
+        "PROFILE: GOOD AT THREAT ASSESSMENT, CLOSE-QUARTERS SECURITY, AND MAKING QUICK DECISIONS WHEN THINGS TURN VIOLENT.",
+        "EQUIPMENT: ARMAT 37A2 12 SHOTGUN (LIMITED AMMO).",
+        "NOTES: ORDF VETERAN; SYNTHETIC ARM. RESPONDS POORLY TO PROLONGED STRESS."
+      ]
+    },
+    {
+      key:"flynn",
+      header:"LIAM FLYNN — SHIP MEDIC",
+      body:[
+        "AGE: 27. TEMPERAMENT: NERVOUS, COMPASSIONATE.",
+        "PROFILE: GOOD AT TRIAGE, STABILIZING WOUNDS, AND KEEPING PEOPLE ALIVE WITH LIMITED SUPPLIES.",
+        "EQUIPMENT: MEDICAL KIT ACCESS (WHERE AVAILABLE).",
+        "NOTES: INVOLVED IN RECENT MEDICAL WORK ABOARD; WITHHOLDS DETAILS UNDER PRESSURE."
+      ]
+    },
+    {
+      key:"clayton",
+      header:"LORI CLAYTON — CORPORATE LIAISON",
+      body:[
+        "AGE: 42. TEMPERAMENT: CALCULATING, FORCEFUL.",
+        "PROFILE: GOOD AT NEGOTIATION, LEVERAGING AUTHORITY, AND SECURING CORPORATE ASSETS UNDER ADVERSE CONDITIONS.",
+        "EQUIPMENT: M4A3 PISTOL (LIMITED AMMO), KEY CARD.",
+        "NOTES: POSSESSES ACCESS CODES TO A WALL SAFE AND EEV CONTROLS IN QUARTERS (DECK B)."
+      ]
+    },
+    {
+      key:"ava",
+      header:"AVA 6 — SYNTHETIC (SERVICE UNIT)",
+      body:[
+        "APPEARS: EARLY 20s. TEMPERAMENT: HELPFUL, DIRECT.",
+        "PROFILE: GOOD AT TECHNICAL MAINTENANCE, LOGISTICS, AND FOLLOWING PROCEDURE WITHOUT HESITATION.",
+        "NOTES: LOCKED OUTSIDE CRYODECK TO MAINTAIN SHIP; DAMAGED (HEAD WOUND).",
+        "ADVISORY: HOSTILE ORGANISMS MAY DISREGARD SYNTHETIC UNITS."
+      ]
+    }
+  ],
+
+  cargo: {
+    manifest: [
+      "SCIENCE PAYLOAD: LV-1113 SAMPLE CRATES (SEALED).",
+      "BIO-SECURITY: RESTRICTED CONTAINMENT REQUIRED.",
+      "NOTE: SCIENCE MODULE WAS EJECTED PRIOR TO CURRENT DRIFT VECTOR (STATUS: UNKNOWN)."
+    ],
+    armory: [
+      "ARMORY: PRESENT (DECK D).",
+      "SECURITY LOCKS: ACTIVE / MAY REQUIRE KEY CARD OR OVERRIDE.",
+      "EVA SUITS: THREE IRC MK.50 COMPRESSION SUITS IN EVA STORAGE (OLDER MODELS) — FUNCTIONAL."
+    ]
+  },
+
+  ops: {
+    repairs: [
+      "COMM ARRAY: EXTERNAL EVA REQUIRED. EXPECT HOURS OF WORK; REPLACE BURNT RELAYS AND RE-ALIGN DISH ACTUATORS.",
+      "ENGINES: EXTERNAL EVA REQUIRED. CLEAR MICRO-METEORITE DAMAGE, RE-SEAT FEED LINES, THEN RE-PRIME IGNITION CONTROL.",
+      "AIR SCRUBBERS: INTERNAL SERVICE REQUIRED. CLEAN/REPLACE FILTER BEDS AND RESTART SCRUBBER CYCLING TO NORMALIZE AIR."
+    ],
+    notes: [
+      "WARNING: REACTOR CONTROL ROOM CLEARANCE ADVISED DURING ENGINE RESTORATION.",
+      "NOTE: RESTORATION EVENTS MAY TRIGGER HOSTILE CONTACTS."
+    ]
+  }
+};
+
+/***********************
+ * Data model (categories → subcats)
+ ***********************/
+const DATA_MODEL = [
+  {
+    id:"system", label:"SYSTEM STATUS", desc:"VESSEL / PROP / LIFE / POWER / COMMS / SENSORS",
+    subs:[
+      { id:"vessel", label:"VESSEL", get:()=>KB.ship.systems.vessel },
+      { id:"prop", label:"PROPULSION", get:()=>KB.ship.systems.propulsion },
+      { id:"life", label:"LIFE SUPPORT", get:()=>KB.ship.systems.lifeSupport },
+      { id:"power", label:"POWER", get:()=>KB.ship.systems.power },
+      { id:"comms", label:"COMMS", get:()=>KB.ship.systems.comms },
+      { id:"sensors", label:"SENSORS", get:()=>KB.ship.systems.sensors },
+    ]
+  },
+  {
+    id:"ship", label:"VESSEL DATA", desc:"OVERVIEW / ACCESS",
+    subs:[
+      { id:"ov", label:"OVERVIEW", get:()=>KB.ship.overview },
+      { id:"acc", label:"ACCESS / MAINFRAME", get:()=>KB.ship.access },
+    ]
+  },
+  {
+    id:"env", label:"LIFE SUPPORT & ENV", desc:"CONDITIONS / ADVISORY",
+    subs:[
+      { id:"aboard", label:"ONBOARD CONDITIONS", get:()=>KB.environment.aboard },
+      { id:"adv", label:"ADVISORY", get:()=>KB.environment.advisory },
+    ]
+  },
+  {
+    id:"sci", label:"SCIENTIFIC DATA", desc:"SUMMARY / PROTOCOLS",
+    subs:[
+      { id:"sum", label:"SUMMARY", get:()=>KB.science.summary },
+      { id:"prot", label:"BIO-PROTOCOLS", get:()=>KB.science.protocols },
+    ]
+  },
+  {
+    id:"crew", label:"CREW MANIFEST", desc:"FILES / PERSONNEL",
+    subs: KB.personnel.map(p => ({
+      id:p.key,
+      label:(p.header.split(" — ")[0] || p.key).toUpperCase(),
+      get:()=>[p.header, ...p.body]
+    }))
+  },
+  {
+    id:"cargo", label:"CARGO & SECURITY", desc:"MANIFEST / ARMORY",
+    subs:[
+      { id:"man", label:"MANIFEST", get:()=>KB.cargo.manifest },
+      { id:"arm", label:"ARMORY / EVA", get:()=>KB.cargo.armory },
+    ]
+  },
+  {
+    id:"ops", label:"OPS / REPAIRS", desc:"REPAIR TASKS / NOTES",
+    subs:[
+      { id:"rep", label:"REPAIR TASKS", get:()=>KB.ops.repairs },
+      { id:"note", label:"OPERATIONAL NOTES", get:()=>KB.ops.notes },
+    ]
+  }
+];
+
+/***********************
+ * Restoration switches
+ ***********************/
+const RESTORE = [
+  {
+    id:"mainframe",
+    label:"MU/TH/UR MAINFRAME",
+    desc:"BRINGS CORE SUBSYSTEMS ONLINE",
+    once:true,
+    apply(){
+      KB.ship.systems.power = [
+        "POWER GRID: STABLE (AUXILIARY FEEDS ROUTED).",
+        "AUX POWER: NOMINAL."
+      ];
+      KB.ship.systems.lifeSupport = [
+        "LIFE SUPPORT: ONLINE (BASELINE).",
+        "LIGHTING: NORMALIZED.",
+        "ATMOSPHERE: STALE; HIGH CO₂ (AIR SCRUBBERS REQUIRED)."
+      ];
+      return [
+        "MAINFRAME BOOT SEQUENCE COMPLETE.",
+        "INTERNAL LIGHTING RESTORED TO STANDARD LEVELS.",
+        "LIFE SUPPORT BASELINE ENGAGED (TEMPERATURE RAMPING).",
+        "NOTE: AIR QUALITY REMAINS DEGRADED UNTIL AIR SCRUBBERS ARE FIXED."
+      ];
+    }
+  },
+  {
+    id:"air",
+    label:"AIR SCRUBBERS",
+    desc:"NORMALIZES O₂/CO₂ MIX",
+    once:true,
+    apply(){
+      KB.ship.systems.lifeSupport = [
+        "LIFE SUPPORT: ONLINE.",
+        "LIGHTING: NORMALIZED.",
+        "ATMOSPHERE: NOMINAL — CO₂ WITHIN SAFE LIMITS."
+      ];
+      return [
+        "AIR SCRUBBERS ONLINE.",
+        "CO₂ LEVELS FALLING TO NOMINAL RANGE.",
+        "BREATHING EASES AS AIR QUALITY RETURNS TO SAFE LIMITS."
+      ];
+    }
+  },
+  {
+    id:"comms",
+    label:"COMMS ARRAY",
+    desc:"RESTORES LONG-RANGE TX/RX",
+    once:true,
+    apply(){
+      KB.ship.systems.comms = [
+        "COMMS ARRAY: ONLINE (PATCHED).",
+        "DISTRESS TRANSMISSION: STABLE.",
+        "BANDWIDTH: LIMITED (AGING HARDWARE)."
+      ];
+      return [
+        "COMMS ARRAY ONLINE.",
+        "DISTRESS SIGNAL LOCKED AND BROADCASTING.",
+        "NOTE: LONG-RANGE SIGNAL QUALITY LIMITED; EXPECT DROPPED PACKETS."
+      ];
+    }
+  },
+  {
+    id:"engines",
+    label:"ENGINES",
+    desc:"RESTORES PROPULSION CONTROL",
+    once:true,
+    apply(){
+      KB.ship.systems.propulsion = [
+        "ENGINES: ONLINE (EXTERNAL REPAIR COMPLETE).",
+        "NAVIGATION CONTROL: PARTIAL (MANUAL COMPENSATION REQUIRED).",
+        "REACTOR: STABLE."
+      ];
+      return [
+        "ENGINE CONTROL RESTORED.",
+        "PROPULSION ONLINE — MANEUVERING THRUST AVAILABLE.",
+        "NAVIGATION REMAINS DEGRADED; MANUAL CALCULATIONS REQUIRED FOR SAFE VECTOR CORRECTION."
+      ];
+    }
+  },
+  {
+    id:"sensors",
+    label:"SENSOR SUITE",
+    desc:"IMPROVES LOCAL TRACKING",
+    once:true,
+    apply(){
+      KB.ship.systems.sensors = [
+        "SENSORS: ONLINE (LOCAL) — THERMAL / MOTION IMPROVED.",
+        "RANGE: LIMITED BY ARRAY DAMAGE."
+      ];
+      return [
+        "SENSOR SUITE ONLINE (LOCAL).",
+        "MOTION / THERMAL RESOLUTION IMPROVED.",
+        "NOTE: RANGE LIMITATIONS PERSIST; BLIND SPOTS POSSIBLE."
+      ];
+    }
+  },
+  {
+    id:"auxlights",
+    label:"AUX LIGHTING",
+    desc:"BOOSTS EMERGENCY LIGHTING",
+    once:true,
+    apply(){
+      return [
+        "AUXILIARY LIGHTING BOOST ENGAGED.",
+        "CORRIDOR ILLUMINATION INCREASED; SHADOW ZONES REDUCED."
+      ];
+    }
+  }
+];
+
+/***********************
+ * UI + typewriter
+ ***********************/
+const els = {
+  clock: document.getElementById("clock"),
+  statusline: document.getElementById("statusline"),
+  restoreGrid: document.getElementById("restoreGrid"),
+  restoreToggle: document.getElementById("restoreToggle"),
+  catToggle: document.getElementById("catToggle"),
+  categories: document.getElementById("categories"),
+  subcats: document.getElementById("subcats"),
+  wsTitle: document.getElementById("wsTitle"),
+  output: document.getElementById("output"),
+};
+
+let activeCat = null;
+let activeSub = null;
+let typingToken = 0;
+
+function nowClock(){
+  const d = new Date();
+  const pad = n=> String(n).padStart(2,"0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+setInterval(()=> els.clock.textContent = nowClock(), 250);
+els.clock.textContent = nowClock();
+
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+function clearOutput(){
+  els.output.innerHTML = "";
+}
+
+function addHR(){
+  const hr = document.createElement("div");
+  hr.className = "hr";
+  els.output.appendChild(hr);
+}
+
+function addLineInstant(text, cls="bright", underline=false){
+  const div = document.createElement("div");
+  div.className = `line ${cls}`.trim();
+  if(underline){
+    const span = document.createElement("span");
+    span.className = "underline";
+    span.textContent = text;
+    div.appendChild(span);
+  }else{
+    div.textContent = text;
+  }
+  els.output.appendChild(div);
+  els.output.scrollTop = els.output.scrollHeight;
+}
+
+async function typeLine(text, {speed=14, cls="bright", underline=false, token} = {}){
+  const div = document.createElement("div");
+  div.className = `line ${cls}`.trim();
+  const span = underline ? document.createElement("span") : document.createElement("span");
+  if(underline) span.className = "underline";
+  div.appendChild(span);
+  els.output.appendChild(div);
+
+  for(let i=0;i<text.length;i++){
+    if(token !== typingToken) return;
+    span.textContent += text[i];
+    els.output.scrollTop = els.output.scrollHeight;
+    await sleep(speed);
+  }
+}
+
+async function typeBlock(lines, {title=null} = {}){
+  typingToken += 1;
+  const token = typingToken;
+  clearOutput();
+
+  if(title){
+    await typeLine(title, {speed: 10, underline:true, token});
+    await sleep(120);
+  }
+
+  for(const ln of lines){
+    if(token !== typingToken) return;
+    await typeLine(ln, {speed: 12, token});
+    await sleep(70);
+  }
+}
+
+function makeChip({h,s, active=false}){
+  const d = document.createElement("div");
+  d.className = "chip" + (active ? " active" : "");
+  const hh = document.createElement("div"); hh.className="h"; hh.textContent = h;
+  const ss = document.createElement("div"); ss.className="s"; ss.textContent = s || "";
+  d.appendChild(hh); d.appendChild(ss);
+  return d;
+}
+
+function renderCategories(){
+  els.categories.innerHTML = "";
+  DATA_MODEL.forEach(cat=>{
+    const chip = makeChip({h:cat.label, s:cat.desc, active: activeCat && activeCat.id===cat.id});
+    chip.onclick = ()=> selectCategory(cat.id);
+    els.categories.appendChild(chip);
+  });
+}
+
+function renderSubcats(cat){
+  els.subcats.innerHTML = "";
+  cat.subs.forEach(sub=>{
+    const chip = makeChip({h:sub.label, s:"SELECT", active: activeSub && activeSub.id===sub.id});
+    chip.onclick = ()=> selectSub(cat.id, sub.id);
+    els.subcats.appendChild(chip);
+  });
+}
+
+async function selectCategory(catId){
+  const cat = DATA_MODEL.find(c=>c.id===catId);
+  if(!cat) return;
+
+  activeCat = cat;
+  activeSub = null;
+
+  renderCategories();
+  renderSubcats(cat);
+
+  els.wsTitle.textContent = cat.label;
+
+  // Replace main output with only the new category info (no scroll hunting).
+  await typeBlock(
+    [
+      "SELECT A SUBCATEGORY ABOVE TO VIEW DETAILS.",
+      "NOTE: OUTPUT PANEL CLEARS ON CATEGORY CHANGE."
+    ],
+    {title: `${cat.label} // READY`}
+  );
+}
+
+async function selectSub(catId, subId){
+  const cat = DATA_MODEL.find(c=>c.id===catId);
+  if(!cat) return;
+  const sub = cat.subs.find(s=>s.id===subId);
+  if(!sub) return;
+
+  activeCat = cat;
+  activeSub = sub;
+
+  renderCategories();
+  renderSubcats(cat);
+
+  const lines = (sub.get() || []).map(x=> String(x));
+  await typeBlock(lines, {title: `${cat.label} // ${sub.label}`});
+}
+
+
+function updateFTLBadge(){
+  const allOn = RESTORE.every(sw => {
+    const el = document.getElementById("sw_" + sw.id);
+    return el && el.checked;
+  });
+  const badge = document.getElementById("ftlBadge");
+  if(!badge) return;
+  if(allOn){
+    badge.classList.add("visible");
+  }else{
+    badge.classList.remove("visible");
+  }
+}
+
+function renderRestore(){
+  els.restoreGrid.innerHTML = "";
+  RESTORE.forEach(sw=>{
+    const row = document.createElement("label");
+    row.className = "check";
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.id = "sw_" + sw.id;
+
+    const txt = document.createElement("div"); txt.className="txt";
+    const k = document.createElement("div"); k.className="k"; k.textContent = sw.label;
+    const d = document.createElement("div"); d.className="d"; d.textContent = sw.desc;
+    txt.appendChild(k); txt.appendChild(d);
+
+    row.appendChild(cb);
+    row.appendChild(txt);
+
+    cb.addEventListener("change", async ()=>{
+      if(!cb.checked) return; // one-way for now
+      if(sw.once) cb.disabled = true;
+
+      // Apply effects + show message in output (typed)
+      const msg = sw.apply();
+      // update statusline with quick summary
+      if(sw.id === "mainframe"){
+        els.statusline.textContent = "MAINFRAME ONLINE. INTERNAL LIGHTING RESTORED. LIFE SUPPORT BASELINE ACTIVE (AIR QUALITY DEGRADED).";
+      }
+      if(sw.id === "air"){
+        els.statusline.textContent = "LIFE SUPPORT ONLINE. AIR QUALITY NOMINAL. INTERNAL TEMPERATURE RAMPING.";
+      }
+      if(sw.id === "comms"){
+        // keep current, but append
+        els.statusline.textContent = els.statusline.textContent.replace(/\.$/,"") + " COMMS ARRAY ONLINE.";
+      }
+      if(sw.id === "engines"){
+        els.statusline.textContent = els.statusline.textContent.replace(/\.$/,"") + " ENGINES ONLINE.";
+      }
+      if(sw.id === "sensors"){
+        els.statusline.textContent = els.statusline.textContent.replace(/\.$/,"") + " SENSORS IMPROVED.";
+      }
+
+      // Show effect text
+      await typeBlock(msg, {title: `SYSTEM RESTORED // ${sw.label}`});
+
+      // If user was browsing SYSTEM STATUS, refresh chips (because KB changed)
+      if(activeCat && activeCat.id === "system"){
+        renderSubcats(activeCat);
+      }
+
+      updateFTLBadge();
+    });
+
+    els.restoreGrid.appendChild(row);
+  });
+}
+
+/***********************
+ * Collapsible panels
+ ***********************/
+function wireCollapse(btn, panel){
+  btn.addEventListener("click", ()=>{
+    const isOpen = btn.getAttribute("aria-expanded") === "true";
+    btn.setAttribute("aria-expanded", String(!isOpen));
+    btn.textContent = isOpen ? "SHOW" : "HIDE";
+    panel.style.display = isOpen ? "none" : "";
+  });
+}
+wireCollapse(els.catToggle, els.categories.parentElement.querySelector("#categories"));
+wireCollapse(els.restoreToggle, els.restoreGrid);
+
+/***********************
+ * Boot
+ ***********************/
+renderRestore();
+renderCategories();
+selectCategory(DATA_MODEL[0].id);
+</script>
+</body>
+</html>
