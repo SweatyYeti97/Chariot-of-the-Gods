@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>MU/TH/UR — FILE INDEX</title>
+
+<style>
+:root{
+  --bg:#000;
+  --fg:#7af042;
+  --fg2:rgba(122,240,66,.75);
+  --line:rgba(122,240,66,.35);
+  --pad:14px;
+  --radius:14px;
+  --fontBase:clamp(15px,3.2vw,22px);
+  --fontSmall:clamp(12px,2.6vw,16px);
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:"Share Tech Mono",ui-monospace,monospace;
+}
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.03) 0px,
+      rgba(255,255,255,.03) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+  opacity:.35;
+}
+
+#app{
+  height:100%;
+  display:grid;
+  grid-template-rows:auto 1fr;
+  padding:var(--pad);
+  box-sizing:border-box;
+}
+
+#topbar{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px;
+  margin-bottom:12px;
+}
+
+#title{
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  font-size:1.05em;
+}
+
+#subtitle{
+  margin-top:6px;
+  color:var(--fg2);
+  font-size:var(--fontSmall);
+  letter-spacing:.08em;
+}
+
+#grid{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px;
+  overflow:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:10px;
+}
+
+a.file{
+  display:block;
+  border:1px solid rgba(122,240,66,.25);
+  border-radius:12px;
+  padding:12px;
+  text-decoration:none;
+  color:var(--fg);
+  background:rgba(0,0,0,.45);
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+
+a.file:hover{
+  border-color:rgba(122,240,66,.75);
+  box-shadow:0 0 12px rgba(122,240,66,.25);
+}
+
+.file .h{
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  font-size:var(--fontSmall);
+}
+
+.file .s{
+  margin-top:4px;
+  color:var(--fg2);
+  font-size:var(--fontSmall);
+}
+
+@media (max-width:520px){
+  #grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <div id="topbar">
+    <div id="title">MU/TH/UR FILE INDEX</div>
+    <div id="subtitle">USCSS MONTERO / USCSS CRONUS — AUTHORIZED ACCESS</div>
+  </div>
+
+  <div id="grid">
+
+    <!-- MONTERO / CRONUS INTERFACES -->
+    <a class="file" href="Miller%20Montero%20MUTHUR%20Interface.html">
+      <div class="h">Montero MU/TH/UR — Miller</div>
+      <div class="s">Primary ship AI interface</div>
+    </a>
+
+    <a class="file" href="Wilson%20Montero%20MUTHUR%20Interface.html">
+      <div class="h">Montero MU/TH/UR — Wilson</div>
+      <div class="s">Restricted corporate access</div>
+    </a>
+
+    <a class="file" href="Cronus%20MUTHUR%20Interface.html">
+      <div class="h">Cronus MU/TH/UR</div>
+      <div class="s">Science vessel recovery interface</div>
+    </a>
+
+    <!-- DIRECTIVES -->
+    <a class="file" href="Infected%20Directive.html">
+      <div class="h">Infected Directive</div>
+      <div class="s">Quarantine protocol</div>
+    </a>
+
+    <!-- CHAM -->
+    <a class="file" href="Cham%20Act%201.html"><div class="h">Cham — Act I</div></a>
+    <a class="file" href="Cham%20Act%202.html"><div class="h">Cham — Act II</div></a>
+    <a class="file" href="Cham%20Act%203.html"><div class="h">Cham — Act III</div></a>
+
+    <!-- DAVIS -->
+    <a class="file" href="Davis%20Act%201.html"><div class="h">Davis — Act I</div></a>
+    <a class="file" href="Davis%20Act%202.html"><div class="h">Davis — Act II</div></a>
+    <a class="file" href="Davis%20Act%203.html"><div class="h">Davis — Act III</div></a>
+
+    <!-- LUCAS -->
+    <a class="file" href="Lucas%20Act%201.html"><div class="h">Lucas — Act I</div></a>
+    <a class="file" href="Lucas%20Act%202.html"><div class="h">Lucas — Act II</div></a>
+    <a class="file" href="Lucas%20Act%203.html"><div class="h">Lucas — Act III</div></a>
+
+    <!-- MILLER -->
+    <a class="file" href="Miller%20Act%201.html"><div class="h">Miller — Act I</div></a>
+    <a class="file" href="Miller%20Act%202.html"><div class="h">Miller — Act II</div></a>
+    <a class="file" href="Miller%20Act%203.html"><div class="h">Miller — Act III</div></a>
+
+    <!-- RYE -->
+    <a class="file" href="Rye%20Act%201.html"><div class="h">Rye — Act I</div></a>
+    <a class="file" href="Rye%20Act%202.html"><div class="h">Rye — Act II</div></a>
+    <a class="file" href="Rye%20Act%203.html"><div class="h">Rye — Act III</div></a>
+
+    <!-- WILSON -->
+    <a class="file" href="Wilson%20Act%201.html"><div class="h">Wilson — Act I</div></a>
+    <a class="file" href="Wilson%20Act%202.html"><div class="h">Wilson — Act II</div></a>
+    <a class="file" href="Wilson%20Act%203.html"><div class="h">Wilson — Act III</div></a>
+
+  </div>
+</div>
+</body>
+</html>
